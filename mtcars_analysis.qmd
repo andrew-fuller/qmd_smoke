@@ -3,62 +3,122 @@ title: "MT Cars Investigation"
 author: "Andrew Fuller | AROC Data Scientist"
 format: html
 editor: source
+params:
+  cyl:
+    value: "all"
+    input: select
+    label: "Filter by cylinders"
+    choices: ["all", "4", "6", "8"]
+  am:
+    value: "all"
+    input: select
+    label: "Filter by transmission"
+    choices: ["all", "0", "1"]
+  show_plots:
+    value: true
+    input: checkbox
+    label: "Show plots"
+  title_suffix:
+    value: ""
+    input: text
+    label: "Title suffix"
 ---
 
 ```{r}
 #| label: setup
 #| echo: false
 library(datasets)
+
+mt <- mtcars
+
+filter_msg <- character()
+
+if (params$cyl != "all") {
+  cyl_val <- as.numeric(params$cyl)
+  mt <- mt[mt$cyl == cyl_val, ]
+  filter_msg <- c(filter_msg, paste0("cyl = ", cyl_val))
+}
+
+if (params$am != "all") {
+  am_val <- as.numeric(params$am)
+  mt <- mt[mt$am == am_val, ]
+  filter_msg <- c(filter_msg, paste0("am = ", am_val))
+}
+
+filter_label <- if (length(filter_msg) > 0) {
+  paste0(" (filtered: ", paste(filter_msg, collapse = ", "), ")")
+} else {
+  ""
+}
+
+data_summary <- if (nrow(mt) < nrow(mtcars)) {
+  paste0(" After filtering, ", nrow(mt), " of ", nrow(mtcars), " cars remain.")
+} else {
+  ""
+}
 ```
 
-## Overview
+## Overview{`r params$title_suffix`}
 
-The `mtcars` dataset comprises fuel consumption and 10 aspects of automobile design and performance for 32 automobiles (1973–74 models).
+The `mtcars` dataset comprises fuel consumption and 10 aspects of automobile design and performance for 32 automobiles (1973–74 models).`r data_summary`
 
 ```{r}
 #| label: glimpse
-str(mtcars)
+str(mt)
 ```
 
-## Summary Statistics
+## Summary Statistics{`r filter_label`}
 
 ```{r}
 #| label: summary-stats
-summary(mtcars)
+summary(mt)
 ```
 
-## MPG by Cylinder Count
+## MPG by Cylinder Count{`r filter_label`}
 
 ```{r}
 #| label: mpg-by-cyl
-boxplot(mpg ~ cyl, data = mtcars,
-        xlab = "Cylinders", ylab = "Miles per Gallon",
-        main = "MPG by Number of Cylinders",
-        col = c("steelblue", "orange", "tomato"))
+if (params$show_plots && nrow(mt) > 0) {
+  if (length(unique(mt$cyl)) > 1) {
+    boxplot(mpg ~ cyl, data = mt,
+            xlab = "Cylinders", ylab = "Miles per Gallon",
+            main = "MPG by Number of Cylinders",
+            col = c("steelblue", "orange", "tomato"))
+  } else {
+    boxplot(mpg ~ cyl, data = mt,
+            xlab = "Cylinders", ylab = "Miles per Gallon",
+            main = paste("MPG | Cylinders =", unique(mt$cyl)),
+            col = "steelblue")
+  }
+}
 ```
 
-## Horsepower vs MPG
+## Horsepower vs MPG{`r filter_label`}
 
 ```{r}
 #| label: hp-vs-mpg
-plot(mtcars$hp, mtcars$mpg,
-     xlab = "Horsepower", ylab = "Miles per Gallon",
-     main = "Horsepower vs MPG",
-     pch = 19, col = "steelblue")
-abline(lm(mpg ~ hp, data = mtcars), col = "tomato", lwd = 2)
+if (params$show_plots && nrow(mt) > 0) {
+  plot(mt$hp, mt$mpg,
+       xlab = "Horsepower", ylab = "Miles per Gallon",
+       main = "Horsepower vs MPG",
+       pch = 19, col = "steelblue")
+  abline(lm(mpg ~ hp, data = mt), col = "tomato", lwd = 2)
+}
 ```
 
-Cars with higher horsepower tend to have lower fuel efficiency (MPG), as shown by the downward trend.
+`r if (nrow(mt) > 0) "Cars with higher horsepower tend to have lower fuel efficiency (MPG), as shown by the downward trend."`
 
-## Weight vs MPG
+## Weight vs MPG{`r filter_label`}
 
 ```{r}
 #| label: wt-vs-mpg
-plot(mtcars$wt, mtcars$mpg,
-     xlab = "Weight (1000 lbs)", ylab = "Miles per Gallon",
-     main = "Weight vs MPG",
-     pch = 19, col = "forestgreen")
-abline(lm(mpg ~ wt, data = mtcars), col = "tomato", lwd = 2)
+if (params$show_plots && nrow(mt) > 0) {
+  plot(mt$wt, mt$mpg,
+       xlab = "Weight (1000 lbs)", ylab = "Miles per Gallon",
+       main = "Weight vs MPG",
+       pch = 19, col = "forestgreen")
+  abline(lm(mpg ~ wt, data = mt), col = "tomato", lwd = 2)
+}
 ```
 
-Heavier cars show a strong negative correlation with fuel efficiency.
+`r if (nrow(mt) > 0) "Heavier cars show a strong negative correlation with fuel efficiency."`
