@@ -1,0 +1,64 @@
+---
+title: "MT Cars Investigation"
+author: "Andrew Fuller | AROC Data Scientist"
+format: html
+editor: source
+---
+
+```{r}
+#| label: setup
+#| echo: false
+library(datasets)
+```
+
+## Overview
+
+The `mtcars` dataset comprises fuel consumption and 10 aspects of automobile design and performance for 32 automobiles (1973–74 models).
+
+```{r}
+#| label: glimpse
+str(mtcars)
+```
+
+## Summary Statistics
+
+```{r}
+#| label: summary-stats
+summary(mtcars)
+```
+
+## MPG by Cylinder Count
+
+```{r}
+#| label: mpg-by-cyl
+boxplot(mpg ~ cyl, data = mtcars,
+        xlab = "Cylinders", ylab = "Miles per Gallon",
+        main = "MPG by Number of Cylinders",
+        col = c("steelblue", "orange", "tomato"))
+```
+
+## Horsepower vs MPG
+
+```{r}
+#| label: hp-vs-mpg
+plot(mtcars$hp, mtcars$mpg,
+     xlab = "Horsepower", ylab = "Miles per Gallon",
+     main = "Horsepower vs MPG",
+     pch = 19, col = "steelblue")
+abline(lm(mpg ~ hp, data = mtcars), col = "tomato", lwd = 2)
+```
+
+Cars with higher horsepower tend to have lower fuel efficiency (MPG), as shown by the downward trend.
+
+## Weight vs MPG
+
+```{r}
+#| label: wt-vs-mpg
+plot(mtcars$wt, mtcars$mpg,
+     xlab = "Weight (1000 lbs)", ylab = "Miles per Gallon",
+     main = "Weight vs MPG",
+     pch = 19, col = "forestgreen")
+abline(lm(mpg ~ wt, data = mtcars), col = "tomato", lwd = 2)
+```
+
+Heavier cars show a strong negative correlation with fuel efficiency.
